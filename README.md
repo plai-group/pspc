@@ -61,3 +61,21 @@ python sample.py --outdir=./tmp --data=PATH_TO_DATASET.zip --denoiser=pspc_sq  -
 ```
 
 Will generate 10 samples, starting from the first 10 latents of `path_to_z.npy`. We have uploaded 1000 initial `z` which we used to produce Figure 9 of our work here: [[Link](https://drive.google.com/file/d/1MBKqRL1NEDEYVJ58hfydqSpLKaXfndO6/view?usp=sharing)]
+
+## Citation
+
+```
+@article{niedoba2024towards,
+  title={Towards a Mechanistic Explanation of Diffusion Model Generalization},
+  author={Niedoba, Matthew and Zwartsenberg, Berend and Murphy, Kevin and Wood, Frank},
+  journal={arXiv preprint arXiv:2411.19339},
+  year={2024}
+}
+```
+
+## Acknowledgement
+
+This code utilizes portions of the [EDM](https://github.com/NVlabs/edm/) codebase. Addtiionally, `NetworkDenoiser` is
+compatible with all network checkpoints from that codebase
+
+## 
