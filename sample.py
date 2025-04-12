@@ -139,7 +139,7 @@ def main(**kwargs):
     # Pick a sampler, draw some samples.
     sampling_fnc = get_sampling_fnc(opts.sampler)
     samples = torch.empty_like(z)
-    for start in tqdm.range(0, opts.n_samples, opts.batch):
+    for start in tqdm.trange(0, opts.n_samples, opts.batch):
         end = min(start+opts.batch, opts.n_samples)
         samples[start:end] = sampling_fnc(
             z[start:end].to(opts.device), denoiser.to(opts.device), t_steps.to(opts.device))
