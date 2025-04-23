@@ -12,7 +12,7 @@ from pspc.dataset import ImageFolderDataset
 from pspc.utils import AttributeDict, default_preprocess_fn, imgs_from_dataset, empirical_pmean, masked_crop, masked_uncrop, edm_t_schedule
 
 
-DENOISER_NAMES = ['empirical', 'network', 'gaussian', 'pspc_sq', 'pspc_flex']
+DENOISER_NAMES = ['empirical', 'network', 'gaussian', 'pspc_sq', 'pspc_flex', 'auto']
 
 class BaseDenoiser(nn.Module):
 
@@ -43,6 +43,8 @@ class BaseDenoiser(nn.Module):
             return PSPCSquareDenoiser(**kwargs)
         elif class_name == 'pspc_flex':
             return PSPCFlexDenoiser(**kwargs)
+        elif class_name == 'auto':
+            return AutoDenoiser(**kwargs)
         else:
             raise ValueError(f'Unrecognized denoiser class_name: {class_name}')
 
@@ -261,9 +263,9 @@ class PSPCFlexDenoiser(PSPCDenoiser):
     
     """The code above this point is provided for implementation context and to provide background material
     for the auto code generation (namely OpenAI's codex) to modify the code below this line."""
-
-    class AutoDenoiser(BaseDenoiser):
-        """Candidate denoiser under the auto generation of denoisers beam search."""
+    
+class AutoDenoiser(BaseDenoiser):
+    """Candidate denoiser under the auto generation of denoisers beam search."""
 
     def __init__(self, dataset: ImageFolderDataset, empirical_bs=100):
         """Construct the denoiser for the provided dataset.

@@ -5,6 +5,7 @@ from functools import partial
 
 import numpy as np
 import torch
+import tqdm
 
 from pspc.dataset import ImageFolderDataset
 
@@ -128,7 +129,7 @@ def masked_uncrop(cropped_data, mask):
 
 """The auto coding approach to improving the mechanistic sampler may wish to modify the two functions below or introduce new functions here."""
 
-def sampler(z_prior: torch.Tensor, denoiser: BaseDenoiser, t_steps: torch.Tensor, huen: bool=False) -> torch.Tensor:
+def sampler(z_prior: torch.Tensor, denoiser: "BaseDenoiser", t_steps: torch.Tensor, huen: bool=False) -> torch.Tensor:
     """Draw PF-ODE samples.
     
     Args:

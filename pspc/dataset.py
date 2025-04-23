@@ -251,3 +251,6 @@ class ImageFolderDataset(Dataset):
         return labels
 
 #----------------------------------------------------------------------------
+
+# Auto code generation may which to make a new dataset class here including additional augmentations or
+# even additional datasets. This is a good place to add that code.
