@@ -1,6 +1,7 @@
 
 import random
 from typing import Any, Callable
+from functools import partial
 
 import numpy as np
 import torch
@@ -124,3 +125,44 @@ def masked_uncrop(cropped_data, mask):
     out = torch.zeros((N, C, H*W), device=cropped_data.device)
     out[:, :, mask.view(-1)] = cropped_data.view(N, C, -1)
     return out.view(N, C, H, W)
+
+"""The auto coding approach to improving the mechanistic sampler may wish to modify the two functions below or introduce new functions here."""
+
+def sampler(z_prior: torch.Tensor, denoiser: BaseDenoiser, t_steps: torch.Tensor, huen: bool=False) -> torch.Tensor:
+    """Draw PF-ODE samples.
+    
+    Args:
+        z_prior: Samples from the diffusion prior. Expected shape [N, C, H, W]
+        denoiser: A denoising function which estimates the posterior mean given z and t.
+        t_steps: Discretized diffusion timesteps, from high to low.
+        huen: Whether to do second-order corrections while sampling. Doubles compute.
+    Returns:
+        A [N, C, H, W] tensor of samples.
+    """
+    z = z_prior
+    n_steps = t_steps.shape[0]
+    N = z_prior.shape[0]
+    for i in tqdm.trange(n_steps):
+        t = t_steps[i].expand(N, 1, 1, 1)
+        t_next = t_steps[i+1].expand(N, 1, 1, 1) if i+1 < n_steps else torch.zeros_like(t)
+
+        D = denoiser(z, t.flatten())
+        dz = (z - D) / t
+        
+        if huen and i+1 < n_steps:
+            z_next = z + (t_next - t) * dz
+            D = denoiser(z_next, t_next.flatten())
+            dz_prime = (z_next - D) / t_next
+            dz = 0.5 * (dz + dz_prime)
+        
+        z = z + (t_next - t) * dz
+    return z    
+
+def get_sampling_fnc(sampler_name: str) -> Callable:
+    if sampler_name == 'euler':
+        return partial(sampler, huen=False)
+    elif sampler_name == 'huen':
+        return partial(sampler, huen=True)
+    else:
+        raise NotImplementedError(f'Sampler {sampler_name} unrecognized.')
+    

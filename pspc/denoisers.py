@@ -258,3 +258,25 @@ class PSPCFlexDenoiser(PSPCDenoiser):
         if threshold == 1.0 and (x > 0 or y > 0):
             return torch.zeros((self.res, self.res), dtype=torch.bool)
         return mask_from_heatmap(heatmap[y, x], threshold)
+    
+    """The code above this point is provided for implementation context and to provide background material
+    for the auto code generation (namely OpenAI's codex) to modify the code below this line."""
+
+    class AutoDenoiser(BaseDenoiser):
+        """Candidate denoiser under the auto generation of denoisers beam search."""
+
+    def __init__(self, dataset: ImageFolderDataset, empirical_bs=100):
+        """Construct the denoiser for the provided dataset.
+
+        Args:
+            dataset: The data distribution which you want the denoiser for.
+        """
+        super().__init__()
+        self.imgs = imgs_from_dataset(dataset)
+        self.empirical_bs = empirical_bs
+
+    """The function signature here may also be adjusted, but remember to also adjust denoise and utils/sample accordingly."""
+    def forward(self, z, t):
+        """Denoise the noisy data z corresponding to diffusion time t.  This is a reference implementation of 
+        the denoiser which is to be rewritten and improved by the beam search."""
+        return empirical_pmean(z, t, self.imgs, bs=self.empirical_bs)

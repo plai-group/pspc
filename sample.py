@@ -1,7 +1,6 @@
 # Draw samples using one of the denoisers.
 
 import click
-from functools import partial
 import os
 from typing import Callable
 
@@ -11,7 +10,7 @@ import tqdm
 
 from pspc.dataset import ImageFolderDataset
 from pspc.denoisers import BaseDenoiser, CIFAR_PATCH_SCHEDULE, CIFAR_THRESHOLD_SCHEDULE, DENOISER_NAMES
-from pspc.utils import AttributeDict, set_seed, edm_t_schedule
+from pspc.utils import AttributeDict, set_seed, edm_t_schedule, sampler, get_sampling_fnc
 
 def parse_num_list(s, cls):
     if isinstance(s, list):
@@ -24,44 +23,6 @@ def parse_int_list(s):
 
 def parse_float_list(s):
     return parse_num_list(s, float)
-
-def sampler(z_prior: torch.Tensor, denoiser: BaseDenoiser, t_steps: torch.Tensor, huen: bool=False) -> torch.Tensor:
-    """Draw PF-ODE samples.
-    
-    Args:
-        z_prior: Samples from the diffusion prior. Expected shape [N, C, H, W]
-        denoiser: A denoising function which estimates the posterior mean given z and t.
-        t_steps: Discretized diffusion timesteps, from high to low.
-        huen: Whether to do second-order corrections while sampling. Doubles compute.
-    Returns:
-        A [N, C, H, W] tensor of samples.
-    """
-    z = z_prior
-    n_steps = t_steps.shape[0]
-    N = z_prior.shape[0]
-    for i in tqdm.trange(n_steps):
-        t = t_steps[i].expand(N, 1, 1, 1)
-        t_next = t_steps[i+1].expand(N, 1, 1, 1) if i+1 < n_steps else torch.zeros_like(t)
-
-        D = denoiser(z, t.flatten())
-        dz = (z - D) / t
-        
-        if huen and i+1 < n_steps:
-            z_next = z + (t_next - t) * dz
-            D = denoiser(z_next, t_next.flatten())
-            dz_prime = (z_next - D) / t_next
-            dz = 0.5 * (dz + dz_prime)
-        
-        z = z + (t_next - t) * dz
-    return z    
-
-def get_sampling_fnc(sampler_name: str) -> Callable:
-    if sampler_name == 'euler':
-        return partial(sampler, huen=False)
-    elif sampler_name == 'huen':
-        return partial(sampler, huen=True)
-    else:
-        raise NotImplementedError(f'Sampler {sampler_name} unrecognized.')
 
 @click.command()
 
