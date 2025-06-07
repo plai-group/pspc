@@ -4,7 +4,7 @@ This repository implements a number of diffusion denoiser methods, including the
 
 **Towards a Mechanistic Explanation of Diffusion Generalization** <br>
 Matthew Niedoba, Berend Zwartsenberg, Kevin Murphy, Frank Wood
-<br> https://https://arxiv.org/abs/2411.19339
+<br> https://arxiv.org/abs/2411.19339
 
 ## Getting Started
 
